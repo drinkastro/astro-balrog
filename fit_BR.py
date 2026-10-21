@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import emcee
 from measure_BR import measure_BR
-from _init_ import path_to_models
+from . import path_to_models
 
 def _interp(y0, y1, p0, p1, p2, plot=False):
     y = y0 + (p0 - p1) * (y1 - y0) / (p2 - p1)
@@ -26,12 +26,11 @@ def _grid_params_smiles():
     mets = np.array([-1.79, -1.49, -1.26, -0.96, -0.66, -0.35, -0.25, 0.06,
                      0.15, 0.26])
     afs = np.array([-0.2, 0.0, 0.2, 0.4, 0.6])
-    slopes = np.array([0.3, 0.5, 0.8, 1.3, 1.5, 1.8, 2., 2.3, 2.5, 2.8, 3., 3.3, 3.5])
 
-    return ages, mets, afs, slopes
+    return ages, mets, afs
 
 
-def _interp_mod(templates, age, met, afe, fixed_imf_slope=1.3):
+def _interp_mod(templates, age, met, afe):
     """
     Return a model of given age, met, and [a/Fe], at a fixed imf.
     This routine is written to deal with the sMILES models,
@@ -42,11 +41,10 @@ def _interp_mod(templates, age, met, afe, fixed_imf_slope=1.3):
     :param age: age to interpolate
     :param met: metallicity to interpolate
     :param afe: [a/Fe] to interpolate
-    :param fixed_imf_slope: imf slope of the bimodal parametrization. Must be a value included in the grid params, not interpolating here. Default: Milky-Way-like.
-    :return: model flux interpolated at age, met, afe, and imf
+    :return: model flux interpolated at age, met, and afe
     """
 
-    ages, metals, afes, slopes = _grid_params_smiles()
+    ages, metals, afes = _grid_params_smiles()
     wa = np.array([np.where(ages < age)[0][-1], np.where(ages >= age)[0][0]])
 
     wm = np.array([np.where(metals < met)[0][-1], np.where(metals >= met)[0][0]])
@@ -57,17 +55,15 @@ def _interp_mod(templates, age, met, afe, fixed_imf_slope=1.3):
     m1, m2 = metals[wm][0], metals[wm][1]
     af1, af2 = afes[waf][0], afes[waf][1]
 
-    ws = slopes == fixed_imf_slope
-
     # interpolate met
-    ym1 = _interp(templates[:, wa[0], wm[0], waf[0], ws].ravel(),
-                 templates[:, wa[0], wm[1], waf[0], ws].ravel(), met, m1, m2)  # a1af1s1
-    ym2 = _interp(templates[:, wa[1], wm[0], waf[0], ws].ravel(),
-                 templates[:, wa[1], wm[1], waf[0], ws].ravel(), met, m1, m2)  # a2af1s1
-    ym3 = _interp(templates[:, wa[0], wm[0], waf[1], ws].ravel(),
-                 templates[:, wa[0], wm[1], waf[1], ws].ravel(), met, m1, m2)  # a1af2s1
-    ym4 = _interp(templates[:, wa[1], wm[0], waf[1], ws].ravel(),
-                 templates[:, wa[1], wm[1], waf[1], ws].ravel(), met, m1, m2)  # a2af2s1
+    ym1 = _interp(templates[:, wa[0], wm[0], waf[0]].ravel(),
+                 templates[:, wa[0], wm[1], waf[0]].ravel(), met, m1, m2)  # a1af1s1
+    ym2 = _interp(templates[:, wa[1], wm[0], waf[0]].ravel(),
+                 templates[:, wa[1], wm[1], waf[0]].ravel(), met, m1, m2)  # a2af1s1
+    ym3 = _interp(templates[:, wa[0], wm[0], waf[1]].ravel(),
+                 templates[:, wa[0], wm[1], waf[1]].ravel(), met, m1, m2)  # a1af2s1
+    ym4 = _interp(templates[:, wa[1], wm[0], waf[1]].ravel(),
+                 templates[:, wa[1], wm[1], waf[1]].ravel(), met, m1, m2)  # a2af2s1
 
     # interpolate age
     ya1 = _interp(ym1, ym2, age, a1, a2)  # af1s1
@@ -252,14 +248,13 @@ def fit_BR(lam, flux, err, age_bf, age_err, sigma_gal=None,
         for i in range(tshape[0]):
             for j in range(tshape[1]):
                 for k in range(tshape[2]):
-                    for l in range(tshape[3]):
-                        c = 299792.458
-                        fwhm_tem = 2.51 #FWHM of the sMILES models at the wavelength of the balmer line
-                        fwhm_g = 2.355*sigma_gal*lam/c
-                        fwhm_gal = np.interp(lam_temp, lam, fwhm_g)
-                        fwhm_diff2 = (fwhm_gal ** 2 - fwhm_tem ** 2).clip(0)
-                        sigma = np.sqrt(fwhm_diff2) / np.sqrt(4 * np.log(4))
-                        templates[:, i, j, k, l] = _ppxf_varsmooth(lam_temp, templates[:, i, j, k, l], sigma)
+                    c = 299792.458
+                    fwhm_tem = 2.51 #FWHM of the sMILES models at the wavelength of the balmer line
+                    fwhm_g = 2.355*sigma_gal*lam/c
+                    fwhm_gal = np.interp(lam_temp, lam, fwhm_g)
+                    fwhm_diff2 = (fwhm_gal ** 2 - fwhm_tem ** 2).clip(0)
+                    sigma = np.sqrt(fwhm_diff2) / np.sqrt(4 * np.log(4))
+                    templates[:, i, j, k] = _ppxf_varsmooth(lam_temp, templates[:, i, j, k], sigma)
 
     ndim = 3
 
