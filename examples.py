@@ -4,7 +4,7 @@ from measure_BR import measure_BR
 from plotting import cornerplot, plot_BR
 from pathlib import Path
 import numpy as np
-from _init_ import path_to_models
+from . import path_to_models
 
 def example_model():
 
@@ -12,16 +12,13 @@ def example_model():
 
     #Create model spectrum
     lib = np.load(path_to_models)
-    lam, templates, ages, metals, afes, imfs = lib["lam"], lib["templates"], lib["ages"], lib["metals"], lib["afes"], lib["slopes"]
-    wl = (lam > 3000) & (lam < 5000) #only consider wavelengths including Balmer lines to reduce computational time
-    lam = lam[wl]
+    lam, templates, ages, metals, afes = lib["lam"], lib["templates"], lib["ages"], lib["metals"], lib["afes"]
 
     #Considering a model at 1 Gyr, solar metallicity, solar [a/Fe], and MW-like IMF
     age = 1 #Gyr
     met = 0.06 #dex
     afe = 0. #solar scale
-    imf = 1.3 #MW-like
-    t0 = templates[wl, ages==age, metals==met, afes==afe, imfs==imf]
+    t0 = templates[:, ages==age, metals==met, afes==afe]
 
     #Adding noise to the model and simulate the error spectrum
     snr = 20
