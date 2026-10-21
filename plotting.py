@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import matplotlib.cm as cm
 from measure_BR import measure_BR
-from _init_ import path_to_models
+from . import path_to_models
 
 
 def cornerplot(samp, truths = None):
@@ -15,25 +15,25 @@ def cornerplot(samp, truths = None):
 
     plt.show()
 
-def plot_BR(br_obs=None, br_obs_err=None, age_bf=None, age_err=None, afe=0.0, imf=1.3,
+def plot_BR(br_obs=None, br_obs_err=None, age_bf=None, age_err=None, afe=0.0,
            age_range=[0.1, 3], met_range = [-1.79, 0.26], title=None,
                       blist = ['Hgamma_F', 'Hdelta_F', 'Hzeta', 'Htheta', 'Hiota', 'Hbeta', 'Heta'], sumn = 5,
-                      savefig_path=None, cmap='plasma'):
+                      cmap='plasma'):
 
     lib = np.load(path_to_models)
-    lam, templates, ages, metals, afes, imfs = lib["lam"], lib["templates"], lib["ages"], lib["metals"], lib["afes"], lib["slopes"]
+    lam, templates, ages, metals, afes = lib["lam"], lib["templates"], lib["ages"], lib["metals"], lib["afes"]
 
     if age_range is not None:
         wa = (ages >= age_range[0]) & (ages <= age_range[1])
         ages = ages[wa]
-        templates = templates[:, wa, :, :, :]
+        templates = templates[:, wa, :, :]
 
     if met_range is not None:
         wm = (metals >= met_range[0]) & (metals <= met_range[1])
         metals = metals[wm]
-        templates = templates[:, :, wm, :, :]
+        templates = templates[:, :, wm, :]
 
-    templates = templates[:, :, :, afes==afe, imfs == imf] #Fixed a/Fe and imf slope
+    templates = templates[:, :, :, afes==afe] #Fixed a/Fe
 
     param_shape = (len(ages), len(metals))
 
@@ -74,7 +74,4 @@ def plot_BR(br_obs=None, br_obs_err=None, age_bf=None, age_err=None, afe=0.0, im
     if savefig_path is not None: plt.savefig(savefig_path+'.pdf', format='pdf', bbox_inches='tight', pad_inches=0.02)
 
     plt.show()
-
-if __name__ == '__main__':
-    plot_BR(br_obs=2, br_obs_err=0.05, age_bf=1, age_err=0.1)
 
