@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from _init_ import path_to_balmers
+from . import path_to_balmers
 
 
 
