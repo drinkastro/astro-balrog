@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "balmerratio"
+name = "astro-balrog"
 version = "0.1.0"
 description = "Measure Balmer-line ratios from galaxy spectra and fit them with sMILES models (emcee) to constrain metallicity."
 readme = "README.md"
