@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "balmerratio"
+version = "0.1.0"
+description = "Measure Balmer-line ratios from galaxy spectra and fit them with sMILES models (emcee) to constrain metallicity."
+readme = "README.md"
+requires-python = ">=3.9"
+# TODO before publishing: add `authors = [...]` and `license = ...` (and a LICENSE file).
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "emcee",
+    "corner",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+balmerratio = ["balmers/*.dat", "ssp_models/*.npz"]

@@ -1,0 +1,4 @@
+include README.md
+recursive-include src/balmerratio/balmers *.dat
+recursive-include src/balmerratio/ssp_models *.npz *.md
+recursive-include tests *.py
