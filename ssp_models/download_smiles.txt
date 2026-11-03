@@ -1,5 +1,0 @@
-You can download the sMILES SSPs from this link:
-
-https://doi.org/10.5281/zenodo.23534716
-
-Then move the npz file to this folder.
