@@ -28,4 +28,4 @@ test = ["pytest"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-balmerratio = ["balmers/*.dat", "ssp_models/*.npz"]
+astro_balrog = ["balmers/*.dat", "ssp_models/*.npz"]
