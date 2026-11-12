@@ -7,4 +7,4 @@ PACKAGE_DIR = Path(__file__).resolve().parent
 
 # Paths to files
 path_to_balmers = PACKAGE_DIR / "balmers" / "balmers.dat"
-path_to_models = PACKAGE_DIR / "ssp_models" / "smiles_bimodal.npz"
+path_to_models = PACKAGE_DIR / "ssp_models" / "smiles_bi1p3.npz"
