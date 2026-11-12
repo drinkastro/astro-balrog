@@ -1,10 +1,10 @@
 import numpy as np
-import os
 from ._paths import path_to_balmers
 
 
 
 def _specidx_definitions():
+    #Generated with Claude and later adjusted    
     """Import balmer spectral index definitions from the table balmer.dat"""
 
     defs = {}
@@ -16,6 +16,7 @@ def _specidx_definitions():
     return defs
 
 def _ew(wave, flux, d):
+    #Generated with Claude and later adjusted    
     """Equivalent width (A): linear pseudo-continuum through side-band means."""
     b0, b1, i0, i1, r0, r1 = d
     if wave[0] > min(d) or wave[-1] < max(d):
@@ -56,6 +57,7 @@ def _compute_ratio(pars, k, errs=None):
     return ratio, err_ratio
 
 def _measure_indices(wave, flux, spec_idx_list, err=None, n_mc=500):
+    #Generated with Claude and later adjusted
     """
     Measure the strengths of the Balmer lines.
 
