@@ -1,8 +1,13 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # lets this example run from the downloaded folder without installing
 import numpy as np
-from .fit import fit_BR
-from .measure import measure_BR
-from .plotting import cornerplot, plot_BR
-from ._paths import path_to_models
+from astro_balrog.fit import fit_BR
+from astro_balrog.measure import measure_BR
+from astro_balrog.plotting import cornerplot, plot_BR
+from astro_balrog._paths import path_to_models
+import matplotlib.pyplot as plt
+
 
 def model_spectrum():
 
@@ -16,7 +21,7 @@ def model_spectrum():
     age = 1 #Gyr
     met = 0.06 #dex
     afe = 0. #solar scale
-    t0 = templates[wl, ages==age, metals==met, afes==afe]
+    t0 = templates[:, ages==age, metals==met, afes==afe].ravel()
 
     #Adding noise to the model and simulate the error spectrum
     snr = 20
