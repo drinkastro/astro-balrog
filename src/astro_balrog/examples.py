@@ -11,8 +11,6 @@ def model_spectrum():
     #Create model spectrum
     lib = np.load(path_to_models)
     lam, templates, ages, metals, afes = lib["lam"], lib["templates"], lib["ages"], lib["metals"], lib["afes"]
-    wl = (lam > 3000) & (lam < 5000) #only consider wavelengths including Balmer lines to reduce computational time
-    lam = lam[wl]
 
     #Considering a model having 1 Gyr, solar metallicity, solar [a/Fe], and MW-like IMF
     age = 1 #Gyr
@@ -22,12 +20,12 @@ def model_spectrum():
 
     #Adding noise to the model and simulate the error spectrum
     snr = 20
-    galaxy = np.random.normal(t0, t0/snr) #Adding Gaussian noise
-    err = np.random.permutation(t0/snr) #Creating error spectrum to fit by permutating the noise spectrum added to the model, to avoid fitting the exact error spectrum
+    galaxy = np.random.normal(t0, t0/snr) #Add Gaussian noise
+    err = np.random.permutation(t0/snr) #Permute input noise to avoid fitting the exact error spectrum
 
-    #Assuming the best-fitting age from SED fitting is consistent with the true age
+    #Best-fit age and error of the model spectrum from FSF
     age_bf = 0.95
-    age_err = 0.2
+    age_err = 0.18
 
     #List of Balmer lines to fit and computing the ratio as (H_0 ... H_sumn-1)/(H_sumn + ... H_-1), where subscripts are the indices of the input list.
     blist = ['Hgamma_F', 'Hdelta_F', 'Hzeta', 'Htheta', 'Hiota', 'Hbeta', 'Heta'] #List of Balmer lines to fit
@@ -59,25 +57,25 @@ def observed_spectrum():
     #Upload galaxy spectrum
     lam, galaxy, err = np.loadtxt('./data/legac_M2_133501.ascii').T
 
-    z = 0.7292
-    masknan = np.where(~np.logical_or(np.isnan(galaxy), np.isnan(err)))
-    err, galaxy, lam = err[masknan], galaxy[masknan], lam[masknan]
+    z = 0.7292 #redshift of the galaxy
+    masknan = np.isfinite(galaxy) & np.isfinite(err)
+    lam, galaxy, err = lam[masknan], galaxy[masknan], err[masknan]
     lam /= (1 + z) #rest-frame
 
-    blist = ['Hgamma_F', 'Hdelta_F', 'Hzeta', 'Hbeta']
-    sumn = 3
-    age_bf, age_err = 1.77, 0.12 #best-fit from pPXF (see Bevacqua+26)
+    blist = ['Hgamma_F', 'Hdelta_F', 'Hzeta', 'Hbeta'] #Available lines in the spectrum
+    sumn = 3 #Sum the first three balmer lines in blist for the numerator
+    age_bf, age_err = 1.77, 0.12 #best-fit from pPXF (Bevacqua+ submitted)
     sigma_gal = 203 #km/s
 
 
-    met_fif, afe_fif = -0.29, 0.14 #Metallicity and [a/Fe] estimated from the FIF (see Bevacqua+)
+    met_fif, afe_fif = -0.29, 0.14 #Metallicity and [a/Fe] estimated from the FIF (see Bevacqua+ submitted)
 
 
     br_obs, br_err = measure_BR(lam, galaxy, err, blist=blist, sumn=sumn)
 
     print("Measured BR: ", round(br_obs, 2), "+/-", round(br_err, 2))
 
-    afe_smiles = 0.2 #Only needed to plot the models
+    afe_smiles = 0.2 #Only needed to plot model predictions of the BR
 
     plot_BR(br_obs=br_obs, br_obs_err=br_err, age_bf=age_bf, age_err=age_err, blist = blist, sumn = sumn, afe_smiles=afe_smiles)
     plt.show()
